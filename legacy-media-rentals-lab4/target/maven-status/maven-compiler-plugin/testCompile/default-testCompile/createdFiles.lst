@@ -1,0 +1,6 @@
+edu\sumdu\rentals\AdditionalGamePricingTest.class
+edu\sumdu\rentals\CustomerMixedTest.class
+edu\sumdu\rentals\CustomerTest.class
+edu\sumdu\rentals\VideoGameRentalTest.class
+edu\sumdu\rentals\PricingBoundaryTest.class
+edu\sumdu\rentals\MovieRentalTest.class

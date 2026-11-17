@@ -1,0 +1,54 @@
+Java 21 / JUnit Platform Console 6.1.3
+java -jar /tmp/l4tools/junit.jar execute --disable-ansi-colors --class-path /tmp/l4tools/classes --details=tree --select-class edu.sumdu.rentals.CustomerMixedTest
+Exit code: 1
+
+Thanks for using JUnit! Support its development at https://junit.org/sponsoring
+
+╷
+├─ JUnit Platform Suite ✔
+├─ JUnit Jupiter ✔
+│  └─ CustomerMixedTest ✔
+│     └─ mixedInvoicePreservesOrderTotalsAndBonusAccumulation() ✘ expected: <Rental Record for Ana
+│              	Regular	3.5
+│              	Premiere	6.0
+│              	Little Big Planet	5.25
+│              Amount owed is 14.75
+│              You earned 5 frequent renter points> but was: <Rental Record for Ana
+│              	Regular	3.5
+│              	Premiere	6.0
+│              	Little Big Planet	5.25
+│              Amount owed is 14.75
+│              You earned 2 frequent renter points>
+└─ JUnit Vintage ✔
+
+Failures (1):
+  JUnit Jupiter:CustomerMixedTest:mixedInvoicePreservesOrderTotalsAndBonusAccumulation()
+    MethodSource [className = 'edu.sumdu.rentals.CustomerMixedTest', methodName = 'mixedInvoicePreservesOrderTotalsAndBonusAccumulation', methodParameterTypes = '']
+    => org.opentest4j.AssertionFailedError: expected: <Rental Record for Ana
+	Regular	3.5
+	Premiere	6.0
+	Little Big Planet	5.25
+Amount owed is 14.75
+You earned 5 frequent renter points> but was: <Rental Record for Ana
+	Regular	3.5
+	Premiere	6.0
+	Little Big Planet	5.25
+Amount owed is 14.75
+You earned 2 frequent renter points>
+       org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:1199)
+       edu.sumdu.rentals.CustomerMixedTest.mixedInvoicePreservesOrderTotalsAndBonusAccumulation(CustomerMixedTest.java:24)
+
+Test run finished after 103 ms
+[         4 containers found      ]
+[         0 containers skipped    ]
+[         4 containers started    ]
+[         0 containers aborted    ]
+[         4 containers successful ]
+[         0 containers failed     ]
+[         1 tests found           ]
+[         0 tests skipped         ]
+[         1 tests started         ]
+[         0 tests aborted         ]
+[         0 tests successful      ]
+[         1 tests failed          ]
+

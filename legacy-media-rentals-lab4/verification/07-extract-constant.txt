@@ -1,0 +1,52 @@
+Java 21 / JUnit Platform Console 6.1.3
+java -jar /tmp/l4tools/junit.jar execute --disable-ansi-colors --class-path /tmp/l4tools/classes --details=tree --scan-class-path
+Exit code: 0
+
+Thanks for using JUnit! Support its development at https://junit.org/sponsoring
+
+╷
+├─ JUnit Platform Suite ✔
+├─ JUnit Jupiter ✔
+│  ├─ CustomerMixedTest ✔
+│  │  └─ mixedInvoicePreservesOrderTotalsAndBonusAccumulation() ✔
+│  ├─ PricingBoundaryTest ✔
+│  │  ├─ childrenAtAndAfterBoundary(int, String) ✔
+│  │  │  ├─ CHILDRENS: days="3" ✔
+│  │  │  └─ CHILDRENS: days="4" ✔
+│  │  ├─ regularAtAndAfterBoundary(int, String) ✔
+│  │  │  ├─ REGULAR: days="2" ✔
+│  │  │  └─ REGULAR: days="3" ✔
+│  │  └─ newReleasePointsBoundary(int, String, int) ✔
+│  │     ├─ NEW_RELEASE: days="1" ✔
+│  │     └─ NEW_RELEASE: days="2" ✔
+│  ├─ CustomerTest ✔
+│  │  ├─ newReleaseTwoDaysEarnsTwoPoints() ✔
+│  │  └─ emptyCustomerHasZeroBalanceAndPoints() ✔
+│  ├─ AdditionalGamePricingTest ✔
+│  │  ├─ xboxConsolePastBoundary() ✔
+│  │  ├─ ps3ConsoleAtBoundary() ✔
+│  │  ├─ ps3ConsolePastBoundary() ✔
+│  │  ├─ xboxWithoutConsoleAtBoundary() ✔
+│  │  ├─ wiiWithoutConsoleAtBoundary() ✔
+│  │  └─ invoiceKeepsMoviesFirstAndBothGamesInInsertionOrder() ✔
+│  ├─ VideoGameRentalTest ✔
+│  │  ├─ ps3FiveDaysWithoutConsoleCostsFivePointTwentyFive() ✔
+│  │  └─ wiiFiveDaysWithConsoleAddsFeeAndBonus() ✔
+│  └─ MovieRentalTest ✔
+│     └─ storesRentedMovieAndNumberOfDays() ✔
+└─ JUnit Vintage ✔
+
+Test run finished after 172 ms
+[        12 containers found      ]
+[         0 containers skipped    ]
+[        12 containers started    ]
+[         0 containers aborted    ]
+[        12 containers successful ]
+[         0 containers failed     ]
+[        18 tests found           ]
+[         0 tests skipped         ]
+[        18 tests started         ]
+[         0 tests aborted         ]
+[        18 tests successful      ]
+[         0 tests failed          ]
+

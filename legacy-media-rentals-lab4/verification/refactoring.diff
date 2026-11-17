@@ -1,0 +1,334 @@
+diff --git a/src/main/java/edu/sumdu/rentals/Customer.java b/src/main/java/edu/sumdu/rentals/Customer.java
+index 84c3127..6ce3861 100644
+--- a/src/main/java/edu/sumdu/rentals/Customer.java
++++ b/src/main/java/edu/sumdu/rentals/Customer.java
+@@ -5,7 +5,7 @@ import java.util.Vector;
+ /** Legacy code kept intentionally imperfect for safe-refactoring practice. */
+ 
+ public class Customer {
+-    public String name;
++    private String name;
+     private final Vector<MovieRental> movieRentals = new Vector<>();
+     private final Vector<VideoGameRental> gameRentals = new Vector<>();
+ 
+@@ -13,6 +13,14 @@ public class Customer {
+         this.name = name;
+     }
+ 
++    public String getName() {
++        return name;
++    }
++
++    public void setName(String name) {
++        this.name = name;
++    }
++
+     public void addMovieRental(MovieRental rental) {
+         movieRentals.addElement(rental);
+     }
+@@ -24,48 +32,24 @@ public class Customer {
+     public String statement() {
+         double totalAmount = 0;
+         int frequentRenterPoints = 0;
+-        String result = "Rental Record for " + name + "\n";
++        StringBuilder result = new StringBuilder("Rental Record for ").append(name).append('\n');
+ 
+-        for (MovieRental each : movieRentals) {
+-            double thisAmount = 0;
+-            // Determine the price of each rental.
+-            switch (each.getMovie().getPriceCode()) {
+-                case Movie.REGULAR:
+-                    thisAmount += 2;
+-                    if (each.getDaysRented() > 2) {
+-                        thisAmount += (each.getDaysRented() - 2) * 1.5;
+-                    }
+-                    break;
+-                case Movie.NEW_RELEASE:
+-                    thisAmount += each.getDaysRented() * 3;
+-                    break;
+-                case Movie.CHILDRENS:
+-                    thisAmount += 1.5;
+-                    if (each.getDaysRented() > 3) {
+-                        thisAmount += (each.getDaysRented() - 3) * 1.25;
+-                    }
+-                    break;
+-                default:
+-                    // Deliberate legacy behavior: unknown price code silently costs zero.
+-                    break;
+-            }
++        for (MovieRental rental : movieRentals) {
++            double charge = rental.getCharge();
+ 
+-            frequentRenterPoints++;
+-            if (each.getMovie().getPriceCode() == Movie.NEW_RELEASE
+-                    && each.getDaysRented() > 1) {
+-                frequentRenterPoints++;
+-            }
+-            result += "\t" + each.getMovie().title + "\t" + thisAmount + "\n";
+-            totalAmount += thisAmount;
++            frequentRenterPoints += rental.getFrequentRenterPoints();
++            result.append('\t').append(rental.getMovie().getTitle()).append('\t').append(charge).append('\n');
++            totalAmount += charge;
+         }
+ 
+-        for (VideoGameRental each : gameRentals) {
+-            frequentRenterPoints += each.getFrequentRenterPoints();
+-            result += "\t" + each.getVideoGame() + "\t" + each.getCharge() + "\n";
+-            totalAmount += each.getCharge();
++        for (VideoGameRental rental : gameRentals) {
++            frequentRenterPoints += rental.getFrequentRenterPoints();
++            double charge = rental.getCharge();
++            result.append('\t').append(rental.getVideoGame()).append('\t').append(charge).append('\n');
++            totalAmount += charge;
+         }
+-        result += "Amount owed is " + totalAmount + "\n";
+-        result += "You earned " + frequentRenterPoints + " frequent renter points";
+-        return result;
++        result.append("Amount owed is ").append(totalAmount).append('\n');
++        result.append("You earned ").append(frequentRenterPoints).append(" frequent renter points");
++        return result.toString();
+     }
+ }
+diff --git a/src/main/java/edu/sumdu/rentals/Movie.java b/src/main/java/edu/sumdu/rentals/Movie.java
+index 0783520..f35d544 100644
+--- a/src/main/java/edu/sumdu/rentals/Movie.java
++++ b/src/main/java/edu/sumdu/rentals/Movie.java
+@@ -7,7 +7,7 @@ public class Movie {
+     public static final int NEW_RELEASE = 1;
+     public static final int CHILDRENS = 2;
+ 
+-    public String title;
++    private String title;
+     private int priceCode;
+ 
+     public Movie(String title, int priceCode) {
+@@ -15,6 +15,14 @@ public class Movie {
+         this.priceCode = priceCode;
+     }
+ 
++    public String getTitle() {
++        return title;
++    }
++
++    public void setTitle(String title) {
++        this.title = title;
++    }
++
+     public int getPriceCode() {
+         return priceCode;
+     }
+diff --git a/src/main/java/edu/sumdu/rentals/MovieRental.java b/src/main/java/edu/sumdu/rentals/MovieRental.java
+index e2fbd5d..f4d3b01 100644
+--- a/src/main/java/edu/sumdu/rentals/MovieRental.java
++++ b/src/main/java/edu/sumdu/rentals/MovieRental.java
+@@ -1,6 +1,14 @@
+ package edu.sumdu.rentals;
+ 
+ public class MovieRental {
++    private static final int REGULAR_BASE_DAYS = 2;
++    private static final double REGULAR_BASE_CHARGE = 2.0;
++    private static final double REGULAR_EXTRA_DAY_CHARGE = 1.5;
++    private static final int CHILDRENS_BASE_DAYS = 3;
++    private static final double CHILDRENS_BASE_CHARGE = 1.5;
++    private static final double CHILDRENS_EXTRA_DAY_CHARGE = 1.25;
++    private static final int NEW_RELEASE_DAILY_CHARGE = 3;
++
+     private final Movie movie;
+     private final int daysRented;
+ 
+@@ -16,4 +24,34 @@ public class MovieRental {
+     public int getDaysRented() {
+         return daysRented;
+     }
++
++    public double getCharge() {
++        double charge = 0;
++        // Determine the price of rental rental.
++        switch (movie.getPriceCode()) {
++            case Movie.REGULAR:
++                charge += REGULAR_BASE_CHARGE;
++                if (daysRented > REGULAR_BASE_DAYS) {
++                    charge += (daysRented - REGULAR_BASE_DAYS) * REGULAR_EXTRA_DAY_CHARGE;
++                }
++                break;
++            case Movie.NEW_RELEASE:
++                charge += daysRented * NEW_RELEASE_DAILY_CHARGE;
++                break;
++            case Movie.CHILDRENS:
++                charge += CHILDRENS_BASE_CHARGE;
++                if (daysRented > CHILDRENS_BASE_DAYS) {
++                    charge += (daysRented - CHILDRENS_BASE_DAYS) * CHILDRENS_EXTRA_DAY_CHARGE;
++                }
++                break;
++            default:
++                // Deliberate legacy behavior: unknown price code silently costs zero.
++                break;
++        }
++        return charge;
++    }
++
++    public int getFrequentRenterPoints() {
++        return movie.getPriceCode() == Movie.NEW_RELEASE && daysRented > 1 ? 2 : 1;
++    }
+ }
+diff --git a/src/main/java/edu/sumdu/rentals/Ps3Game.java b/src/main/java/edu/sumdu/rentals/Ps3Game.java
+index 3e59d24..5dd6bc0 100644
+--- a/src/main/java/edu/sumdu/rentals/Ps3Game.java
++++ b/src/main/java/edu/sumdu/rentals/Ps3Game.java
+@@ -1,6 +1,6 @@
+ package edu.sumdu.rentals;
+ 
+-public class Ps3Game {
++public class Ps3Game implements VideoGame {
+     private static final double CONSOLE_RENTAL_COST = 29.99;
+     private static final int NUM_DAYS_BASE_PRICE = 4;
+     private static final double BASE_PRICE = 4;
+@@ -12,6 +12,7 @@ public class Ps3Game {
+         gameName = name;
+     }
+ 
++    @Override
+     public double getCharge(int daysRented, boolean consoleRented) {
+         double result = BASE_PRICE;
+         if (daysRented > NUM_DAYS_BASE_PRICE) {
+@@ -23,6 +24,7 @@ public class Ps3Game {
+         return result;
+     }
+ 
++    @Override
+     public int getFrequentRenterPoints(int daysRented, boolean consoleRented) {
+ 
+         if (consoleRented && daysRented > NUM_DAYS_BASE_PRICE) {
+diff --git a/src/main/java/edu/sumdu/rentals/VideoGame.java b/src/main/java/edu/sumdu/rentals/VideoGame.java
+new file mode 100644
+index 0000000..a55a7f0
+--- /dev/null
++++ b/src/main/java/edu/sumdu/rentals/VideoGame.java
+@@ -0,0 +1,7 @@
++package edu.sumdu.rentals;
++
++/** A common behavior contract for all supported video games. */
++public interface VideoGame {
++    double getCharge(int daysRented, boolean consoleRented);
++    int getFrequentRenterPoints(int daysRented, boolean consoleRented);
++}
+diff --git a/src/main/java/edu/sumdu/rentals/VideoGameRental.java b/src/main/java/edu/sumdu/rentals/VideoGameRental.java
+index 24a389a..7a7df82 100644
+--- a/src/main/java/edu/sumdu/rentals/VideoGameRental.java
++++ b/src/main/java/edu/sumdu/rentals/VideoGameRental.java
+@@ -1,15 +1,12 @@
+ package edu.sumdu.rentals;
+ 
+-/** This class intentionally uses Object and type tests: refactor them in Lab 4. */
+ public class VideoGameRental {
+-    private final Object videoGame;
++    private final VideoGame videoGame;
+     private final int daysRented;
+     private final boolean consoleRented;
+ 
+-    public VideoGameRental(Object videoGame, int daysRented, boolean consoleRented) {
+-        if (!(videoGame instanceof Ps3Game)
+-                && !(videoGame instanceof Xbox360Game)
+-                && !(videoGame instanceof WiiGame)) {
++    public VideoGameRental(VideoGame videoGame, int daysRented, boolean consoleRented) {
++        if (videoGame == null) {
+             throw new IllegalArgumentException("Unsupported game type");
+         }
+         this.videoGame = videoGame;
+@@ -17,7 +14,7 @@ public class VideoGameRental {
+         this.consoleRented = consoleRented;
+     }
+ 
+-    public Object getVideoGame() {
++    public VideoGame getVideoGame() {
+         return videoGame;
+     }
+ 
+@@ -26,29 +23,10 @@ public class VideoGameRental {
+     }
+ 
+     public double getCharge() {
+-        if (videoGame instanceof Ps3Game) {
+-            return ((Ps3Game) videoGame).getCharge(daysRented, consoleRented);
+-        }
+-        if (videoGame instanceof Xbox360Game) {
+-            return ((Xbox360Game) videoGame).getCharge(daysRented, consoleRented);
+-        }
+-        if (videoGame instanceof WiiGame) {
+-            return ((WiiGame) videoGame).getCharge(daysRented, consoleRented);
+-        }
+-        return 0;
++        return videoGame.getCharge(daysRented, consoleRented);
+     }
+ 
+     public int getFrequentRenterPoints() {
+-        if (videoGame instanceof Ps3Game) {
+-            return ((Ps3Game) videoGame).getFrequentRenterPoints(daysRented, consoleRented);
+-        }
+-        if (videoGame instanceof Xbox360Game) {
+-            return ((Xbox360Game) videoGame).getFrequentRenterPoints(daysRented, consoleRented);
+-        }
+-
+-        if (videoGame instanceof WiiGame) {
+-            return ((WiiGame) videoGame).getFrequentRenterPoints(daysRented, consoleRented);
+-        }
+-        return 0;
++        return videoGame.getFrequentRenterPoints(daysRented, consoleRented);
+     }
+ }
+diff --git a/src/main/java/edu/sumdu/rentals/WiiGame.java b/src/main/java/edu/sumdu/rentals/WiiGame.java
+index 05ddc5e..8c09205 100644
+--- a/src/main/java/edu/sumdu/rentals/WiiGame.java
++++ b/src/main/java/edu/sumdu/rentals/WiiGame.java
+@@ -1,6 +1,6 @@
+ package edu.sumdu.rentals;
+ 
+-public class WiiGame {
++public class WiiGame implements VideoGame {
+     private static final double CONSOLE_RENTAL_COST = 29.99;
+     private static final double CONSOLE_MODIFIER = 0.75;
+     private static final int NUM_DAYS_BASE_PRICE = 4;
+@@ -13,6 +13,7 @@ public class WiiGame {
+         gameName = name;
+     }
+ 
++    @Override
+     public double getCharge(int daysRented, boolean consoleRented) {
+ 
+         double result = BASE_PRICE;
+@@ -26,6 +27,7 @@ public class WiiGame {
+         return result;
+     }
+ 
++    @Override
+     public int getFrequentRenterPoints(int daysRented, boolean consoleRented) {
+         if (consoleRented) {
+             return FREQUENT_RENTER_POINTS + daysRented;
+diff --git a/src/main/java/edu/sumdu/rentals/Xbox360Game.java b/src/main/java/edu/sumdu/rentals/Xbox360Game.java
+index 41be2a9..b55e5df 100644
+--- a/src/main/java/edu/sumdu/rentals/Xbox360Game.java
++++ b/src/main/java/edu/sumdu/rentals/Xbox360Game.java
+@@ -1,6 +1,6 @@
+ package edu.sumdu.rentals;
+ 
+-public class Xbox360Game {
++public class Xbox360Game implements VideoGame {
+     private static final double CONSOLE_RENTAL_COST = 29.99;
+     private static final int NUM_DAYS_BASE_PRICE = 3;
+     private static final double BASE_PRICE = 3.5;
+@@ -12,6 +12,7 @@ public class Xbox360Game {
+         gameName = name;
+     }
+ 
++    @Override
+     public double getCharge(int daysRented, boolean consoleRented) {
+         double result = BASE_PRICE;
+         if (daysRented > NUM_DAYS_BASE_PRICE) {
+@@ -23,6 +24,7 @@ public class Xbox360Game {
+         return result;
+     }
+ 
++    @Override
+     public int getFrequentRenterPoints(int daysRented, boolean consoleRented) {
+         if (consoleRented && daysRented > NUM_DAYS_BASE_PRICE) {
+             return FREQUENT_RENTER_POINTS + daysRented - NUM_DAYS_BASE_PRICE;
